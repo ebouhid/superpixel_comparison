@@ -1,1 +1,3 @@
 SegmentationResults/
+results/
+__pycache__/
