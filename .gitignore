@@ -1,3 +1,5 @@
 SegmentationResults/
 results/
 __pycache__/
+scenes_allbands_ndvi/
+truth_masks/
