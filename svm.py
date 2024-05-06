@@ -1,7 +1,6 @@
 from sklearn.svm import SVC
 from sklearn.metrics import balanced_accuracy_score
 from classification_dataset import ClassificationDataset
-from argparse import ArgumentParser
 import os
 
 def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path, truth_path):
@@ -38,7 +37,7 @@ def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path
         f.write(f"seed: {seed}\n")
         f.write(f"method: {method}\n")
         f.write(f"n_segs_param: {n_segs_param}\n")
-        f.write(f"band_combination: {band_combination}\n")
+        f.write(f"band_combination: {band_combination_name}\n")
         f.write(f"train_size: {len(X_train)}\n")
         f.write(f"train_forest_count: {len(y_train) - sum(y_train)}\n")
         f.write(f"train_non_forest_count: {sum(y_train)}\n")
