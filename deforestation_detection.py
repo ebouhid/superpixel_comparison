@@ -9,6 +9,9 @@ def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path
             kernel='rbf',
             class_weight='balanced',
             random_state=seed)
+
+    if isinstance(n_segs_param, int):
+        n_segs_param = str(n_segs_param)
     
     superpixels_path = os.path.join('SegmentationResults', method, 'scenes_rgb', n_segs_param)
 
