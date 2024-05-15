@@ -13,7 +13,7 @@ def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path
     if isinstance(n_segs_param, int):
         n_segs_param = str(n_segs_param)
     
-    superpixels_path = os.path.join('SegmentationResults', method, 'scenes_rgb', n_segs_param)
+    superpixels_path = os.path.join('SegmPCA_original', method, 'scenes_pca', n_segs_param)
 
     train_regions = ['x01', 'x02', 'x06', 'x07', 'x08', 'x09', 'x10']
     test_regions = ['x03', 'x04']
@@ -32,11 +32,20 @@ def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     bal_acc = balanced_accuracy_score(y_test, y_pred)
+    tp = sum([1 for y, y_pred in zip(y_test, y_pred) if y == 0 and y_pred == 0])
+    tn = sum([1 for y, y_pred in zip(y_test, y_pred) if y == 1 and y_pred == 1])
+    fp = sum([1 for y, y_pred in zip(y_test, y_pred) if y == 1 and y_pred == 0])
+    fn = sum([1 for y, y_pred in zip(y_test, y_pred) if y == 0 and y_pred == 1])
+
+    sensitivity = tp / (tp + fn)
+    specificity = tn / (tn + fp)
 
     # Save results to a txt file
     os.makedirs('results', exist_ok=True)
     with open(f"results/{method}_{n_segs_param}_{band_combination_name}.txt", "w") as f:
         f.write(f"bal_acc: {bal_acc}\n")
+        f.write(f"specificity: {specificity}\n")
+        f.write(f"sensitivity: {sensitivity}\n")
         f.write(f"seed: {seed}\n")
         f.write(f"method: {method}\n")
         f.write(f"n_segs_param: {n_segs_param}\n")
