@@ -1,4 +1,5 @@
 SegmentationResults/
+SegmPCA_original/
 results/
 __pycache__/
 scenes_allbands_ndvi/
