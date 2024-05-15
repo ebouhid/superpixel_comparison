@@ -3,6 +3,7 @@ import skimage
 from tqdm import tqdm
 from haralick_features import get_haralick_features
 from glob import glob
+from PIL import Image
 
 def get_hor(segment):
     # flattening segment
@@ -19,6 +20,8 @@ def get_hor(segment):
 def get_major_class(mask):
     if np.argmax(np.bincount(mask.flatten().astype(np.uint8))) == 2:
         return "forest"
+    elif np.argmax(np.bincount(mask.flatten().astype(np.uint8))) == 3:
+        return "non_forest"
     else:
         return "non_forest"
 
@@ -73,7 +76,11 @@ class ClassificationDataset:
             image = np.load(path).astype(np.uint8).transpose(1, 2, 0) # transpose do H x W x C
             image = image[:, :, combination]
             truth = np.load(f"{truth_path}/truth_{region}.npy")
-            superpixels = skimage.io.imread(f"{superpixels_path}/rgb_{region}.pgm")
+            try:
+                superpixels = skimage.io.imread(f"{superpixels_path}/pca_{region}.pgm")
+            except FileNotFoundError:
+                superpixels = Image.open(f"{superpixels_path}/pca_{region}.png")
+                superpixels = np.array(superpixels)
             
             assert truth.shape[:2] == superpixels.shape[:2]
             assert truth.shape[:2] == image.shape[:2]
@@ -85,22 +92,16 @@ class ClassificationDataset:
                 if evaluate_segment(msk_segment):
                     segment_har = get_haralick_features(img_segment)
                     segment_har = segment_har.flatten()
-                    self.X.append(segment_har)
                     if get_major_class(msk_segment) == "forest":
                         cls_value = 0
-                    else:
+                    elif get_major_class(msk_segment) == "non_forest":
                         cls_value = 1
-                    self.y.append(cls_value)
-
-
-        
+                    else:
+                        continue
+                    self.X.append(segment_har)
+                    self.y.append(cls_value)      
 
     def get_set(self):
         return self.X, self.y
 
-    
-
-    
-
-
-        
+   
