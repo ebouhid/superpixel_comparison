@@ -3,7 +3,7 @@ from sklearn.metrics import balanced_accuracy_score
 from classification_dataset import ClassificationDataset
 import os
 
-def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path, truth_path):
+def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path, truth_path, result_path):
     clf = SVC(C=100,
             gamma='scale',
             kernel='rbf',
@@ -41,8 +41,8 @@ def train_and_evaluate(method, n_segs_param, band_combination, seed, images_path
     specificity = tn / (tn + fp)
 
     # Save results to a txt file
-    os.makedirs('results', exist_ok=True)
-    with open(f"results/{method}_{n_segs_param}_{band_combination_name}.txt", "w") as f:
+    os.makedirs(f'{result_path}', exist_ok=True)
+    with open(f"{result_path}/{method}_{n_segs_param}_{band_combination_name}.txt", "w") as f:
         f.write(f"bal_acc: {bal_acc}\n")
         f.write(f"specificity: {specificity}\n")
         f.write(f"sensitivity: {sensitivity}\n")

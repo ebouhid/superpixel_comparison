@@ -1,13 +1,24 @@
 from deforestation_detection import train_and_evaluate
 from itertools import product
 from multiprocessing import Pool, cpu_count
+import argparse
 
-def run_task(params):
+
+def run_task(params, result_path='results'):
     method, n_seg = params
-    train_and_evaluate(method, n_seg, [3, 2, 1], 42, 'scenes_allbands_ndvi', 'truth_masks')
+    train_and_evaluate(method, n_seg, [
+                       3, 2, 1], 42, 'scenes_allbands_ndvi', 'truth_masks', result_path)
     return f"Finished {method} with {n_seg} segments!"
 
+
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(
+        description='Run deforestation detection with different superpixel methods.')
+    parser.add_argument('--result-path', '-r', type=str,
+                        default='results', help='Path to save the results')
+    parser.add_argument('--num-processes', '-n', type=int)
+    args = parser.parse_args()
+
     # Define parameters
     methods = [
         # "AINET"
@@ -32,15 +43,16 @@ if __name__ == '__main__':
         "SSFCN"
     ]
 
-    n_seg_parameters = [1000, 1500, 2000, 2500, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
+    n_seg_parameters = [1000, 1500, 2000, 2500, 3000,
+                        4000, 5000, 6000, 7000, 8000, 9000, 10000]
 
     # Choose the number of processes to run simultaneously
-    num_processes = 8
+    num_processes = args.num_processes or 4
 
     # Create a pool of workers with specified number of processes
     with Pool(processes=num_processes) as pool:
         # Map the function to the parameters and execute in parallel
-        results = pool.map(run_task, product(methods, n_seg_parameters))
+        results = pool.map(run_task, product(methods, n_seg_parameters), args.result_path)
 
     for result in results:
         print(result)
