@@ -1,8 +1,9 @@
 SegmentationResults/
 SegmPCA_original/
-results/
+results*/
 __pycache__/
 scenes_allbands_ndvi/
 truth_masks/
 *.out
 parsed_results.csv
+SegmPCA_maskRelabelFull
