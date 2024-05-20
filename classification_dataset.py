@@ -4,6 +4,7 @@ from tqdm import tqdm
 from haralick_features import get_haralick_features
 from glob import glob
 from PIL import Image
+import os
 
 def get_hor(segment):
     # flattening segment
@@ -21,7 +22,7 @@ def get_major_class(mask):
     if np.argmax(np.bincount(mask.flatten().astype(np.uint8))) == 2:
         return "forest"
     elif np.argmax(np.bincount(mask.flatten().astype(np.uint8))) == 3:
-        return "non_forest"
+        return "not_analyzed"
     else:
         return "non_forest"
 
@@ -76,11 +77,20 @@ class ClassificationDataset:
             image = np.load(path).astype(np.uint8).transpose(1, 2, 0) # transpose do H x W x C
             image = image[:, :, combination]
             truth = np.load(f"{truth_path}/truth_{region}.npy")
-            try:
-                superpixels = skimage.io.imread(f"{superpixels_path}/pca_{region}.pgm")
-            except FileNotFoundError:
-                superpixels = Image.open(f"{superpixels_path}/pca_{region}.png")
+            
+            pgm_pattern = f"{superpixels_path}/*{region}.pgm"
+            png_pattern = f"{superpixels_path}/*{region}.png"
+            
+            if len(glob(pgm_pattern)) > 0:
+                segmentation_file = glob(pgm_pattern)[0]
+                superpixels = skimage.io.imread(segmentation_file)
+            elif len(glob(png_pattern)) > 0:
+                segmentation_file = glob(png_pattern)[0]
+                superpixels = Image.open(segmentation_file)
                 superpixels = np.array(superpixels)
+            else:
+                raise FileNotFoundError(f"Superpixels file not found for {superpixels_path.split('/')[1]} method on {region} region")
+
             
             assert truth.shape[:2] == superpixels.shape[:2]
             assert truth.shape[:2] == image.shape[:2]
