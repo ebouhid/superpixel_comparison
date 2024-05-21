@@ -26,19 +26,21 @@ if __name__ == '__main__':
 
     # Define parameters
     methods = [
-        # "AINET"
+        "AINET"
         "CRS",
         "DISF",
+        "DRW",
         "ERGC",
         "ERS",
         "ETPS",
+        "GMMSP",
         "GRID",
         "IBIS",
         "ISF",
-        # "LNSNet",
         "LSC",
         "ODISF",
         "RSS",
+        "SCALP",
         "SEEDS",
         "SH",
         "SICLE",
