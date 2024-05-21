@@ -22,7 +22,7 @@ def get_major_class(mask):
     if np.argmax(np.bincount(mask.flatten().astype(np.uint8))) == 2:
         return "forest"
     elif np.argmax(np.bincount(mask.flatten().astype(np.uint8))) == 3:
-        return "not_analyzed"
+        return "non_forest"
     else:
         return "non_forest"
 
