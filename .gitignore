@@ -8,3 +8,4 @@ truth_masks/
 parsed_results.csv
 SegmPCA_maskRelabelFull
 latex*
+*.png
