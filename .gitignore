@@ -7,3 +7,4 @@ truth_masks/
 *.out
 parsed_results.csv
 SegmPCA_maskRelabelFull
+latex*
