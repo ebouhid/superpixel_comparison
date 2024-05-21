@@ -8,21 +8,28 @@ import numpy as np
 from PIL import Image
 import skimage.io as io
 import argparse
+from glob import glob
 
-
-def count_total_segs(method, n_segs_param, seg_dir, seg_prefix='rgb'):
+def count_total_segs(method, n_segs_param, seg_dir):
     train_candidates = 0
     test_candidates = 0
     for region in ["x01", "x02", "x03", "x04", "x06", "x07", "x08", "x09", "x10"]:
         print(
             f"Counting superpixels for {method} with {n_segs_param} segments")
-        try:
-            seg_path = f"{seg_dir}/{method}/scenes_pca/{n_segs_param}/{seg_prefix}_{region}.pgm"
-            seg = io.imread(seg_path)
-        except FileNotFoundError:
-            seg_path = f"{seg_dir}/{method}/scenes_pca/{n_segs_param}/{seg_prefix}_{region}.png"
-            seg = Image.open(seg_path)
+        
+        png_pattern = f"{seg_dir}/{method}/scenes_pca/{n_segs_param}/*{region}.png"
+        pgm_pattern = f"{seg_dir}/{method}/scenes_pca/{n_segs_param}/*{region}.pgm"
+
+        if len(glob(pgm_pattern)) > 0:
+            seg_file = glob(pgm_pattern)[0]
+            seg = io.imread(seg_file)
+        elif len(glob(png_pattern)) > 0:
+            seg_file = glob(png_pattern)[0]
+            seg = Image.open(seg_file)
             seg = np.array(seg)
+        else:
+            raise FileNotFoundError(f"Superpixels file not found for {method} method on {region} region")
+        
         if region in ["x03", "x04"]:
             test_candidates += len(np.unique(seg))
         else:
@@ -55,7 +62,7 @@ def parse_txt_file(file_path):
     return data
 
 
-def main(directory, seg_dir, seg_prefix='rgb'):
+def main(directory, seg_dir):
     # Get list of txt files in the directory
     txt_files = [file for file in os.listdir(
         directory) if file.endswith('.txt')]
@@ -84,7 +91,7 @@ def main(directory, seg_dir, seg_prefix='rgb'):
         method = row['method']
         n_segs_param = row['n_segs_param']
         train_candidates, test_candidates = count_total_segs(
-            method, n_segs_param, seg_dir, seg_prefix).values()
+            method, n_segs_param, seg_dir).values()
         df.loc[index, 'train_candidates'] = train_candidates
         df.loc[index, 'test_candidates'] = test_candidates
 
@@ -153,8 +160,6 @@ if __name__ == "__main__":
                         help="Directory containing the results")
     parser.add_argument("--seg-dir", type=str,
                         help="Directory containing the superpixels")
-    parser.add_argument("--seg-prefix", type=str,
-                        help="Override prefix of the superpixel files. (It is automatically obtained from the result filenames", required=False)
     parser.add_argument("--latex-dir", type=str,
                         help="Directory to save the LaTeX files")
     args = parser.parse_args()
@@ -163,13 +168,7 @@ if __name__ == "__main__":
     seg_dir = args.seg_dir
     latex_dir = args.latex_dir
 
-    if args.seg_prefix:
-        seg_prefix = args.seg_prefix
-    else:
-        random_file = random.choice(os.listdir(directory))
-        seg_prefix = random_file.split('_')[-1].split('.')[0]
-
-    df, plot_output_path = main(directory)
+    df, plot_output_path = main(directory, seg_dir)
     print("DataFrame:")
     print(df)
 
